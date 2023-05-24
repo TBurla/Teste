@@ -1,0 +1,77 @@
+# Prepare
+  # Open packages
+library(phytools)
+library(geiger)
+library(caper)
+library(picante)
+library(tidyr)
+
+  # Set work directory
+wd <- "C:/Users/Microsoft/Desktop/UFPA/CEABIO/Bryconops"
+setwd(wd)
+
+  # Set Data
+data_tree <- read.tree("Bry_MLp3.nwk")
+data_morfo <- read.csv("BrycMorfo2.csv", header=TRUE)
+
+  # Verify and keep species that will be utilized in tree
+rownames(data_morfo) <- data_morfo$sample_ID
+name.check(data_tree, data_morfo)
+
+# Check if both data are in the same order
+morfo <- data_morfo[data_tree$tip.label, ]
+
+
+# Calculating phylogenetic signal
+
+  # Set variables for test
+Dorsal.fin.colour <- log(data_morfo$DF_Col)
+names(Dorsal.fin.colour) <- data_morfo$sample_ID
+
+Dorsal.fin.melanic.patch <- log(data_morfo$DF_Mel)
+names(Dorsal.fin.melanic.patch) <- data_morfo$sample_ID
+
+Adipose.fin.colour <- log(data_morfo$AdF_Col)
+names(Adipose.fin.colour) <- data_morfo$sample_ID
+
+Dorsal.lobe.caudal.fin.colour <- log(data_morfo$dCF_Col)
+names(Dorsal.lobe.caudal.fin.colour) <- data_morfo$sample_ID
+
+Ventral.lobe.caudal.fin.colour <- log(data_morfo$vCF_Col)
+names(Ventral.lobe.caudal.fin.colour) <- data_morfo$sample_ID
+
+Water.type <- log(data_morfo$WaterType)
+names(Water.type) <- data_morfo$sample_ID
+
+## Pagel Test
+phylosig(data_tree, Dorsal.fin.colour, method="lambda", test=TRUE, nsim=1000)
+phylosig(data_tree, Dorsal.fin.melanic.patch, method="lambda", test=TRUE, nsim=1000)
+phylosig(data_tree, Adipose.fin.colour, method="lambda", test=TRUE, nsim=1000)
+phylosig(data_tree, Dorsal.lobe.caudal.fin.colour, method="lambda", test=TRUE, nsim=1000)
+phylosig(data_tree, Ventral.lobe.caudal.fin.colour, method="lambda", test=TRUE, nsim=1000)
+phylosig(data_tree, Water.type, method="lambda", test=TRUE, nsim=1000)
+
+  # Show results
+    # Uma forma de visualizar o resultado do teste de Pagel ? trasnformando a ?rvore de acordo com cada vari?vel,
+    #transforma??es cuja valor da vari?vel sejam 0, indicam falta de sinal filogen?tico,
+    #aquelas com valores iguais a 1 possuem covariancia entre as esp?cies de acordo com a filogenia apresentada.
+par(mfcol=c(1,3))
+plotTree(phytools:::lambdaTree(data_tree,1), ftype="i",
+         mar=c(0.1,0.1,4.1,0.1), fsize=0.5, lwd=1)
+title(main=expression(paste("Pagel's ", lambda, " = 1.0", sep="")))
+
+plotTree(phytools:::lambdaTree(data_tree,0.5),ftype="i",
+         mar=c(0.1,0.1,4.1,0.1),fsize=0.5,lwd=1)
+title(main=expression(paste("Pagel's ",lambda," = 0.5",sep="")))
+
+plotTree(phytools:::lambdaTree(data_tree,0),ftype="i",
+         mar=c(0.1,0.1,4.1,0.1),fsize=0.5, lwd=1)
+title(main=expression(paste("Pagel's ",lambda," = 0.0",sep="")))
+
+## Bloomberg test
+phylosig(data_tree, Dorsal.fin.colour, method="K", test=TRUE, nsim=1000)
+phylosig(data_tree, Dorsal.fin.melanic.patch, method="K", test=TRUE, nsim=1000)
+phylosig(data_tree, Adipose.fin.colour, method="K", test=TRUE, nsim=1000)
+phylosig(data_tree, Dorsal.lobe.caudal.fin.colour, method="K", test=TRUE, nsim=1000)
+phylosig(data_tree, Ventral.lobe.caudal.fin.colour, method="K", test=TRUE, nsim=1000)
+phylosig(data_tree, Water.type, method="K", test=TRUE, nsim=1000)
