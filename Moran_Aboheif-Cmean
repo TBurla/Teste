@@ -1,0 +1,38 @@
+# Settings
+  # Open packages
+library(picante)
+library(ape)
+library(adephylo)
+library(ade4)
+library(phylobase)
+library(geiger)
+
+  # Set work directory
+wd <- "C:/Users/Microsoft/Desktop/UFPA/CEABIO/Bryconops"
+setwd(wd)
+
+  # Open Data
+data_tree <- read.tree("Bry_MLp3.nwk")
+data_morfo <- read.csv("BrycMorfo2.csv", header=TRUE)
+
+  # Check for errors in species_ID
+rownames(data_morfo) <- data_morfo$sample_ID
+name.check(data_tree, data_morfo)
+
+  # Check if the species are in the same order
+data_morfo <- data_morfo[data_tree$tip.label, ]
+
+# Calculating phylogenetic signal
+
+  # Create archieve that combine phylogeny and data
+phylotraits <- phylo4d(data_tree, data_morfo)
+
+## Moran test
+moran.test <- abouheif.moran(phylotraits, method="Abouheif")
+  # Show results
+plot(moran.test)
+
+
+## Abouheif's test
+abouheif.test <- abouheif.moran(phylotraits, method="oriAbouheif")
+abouheif.test
